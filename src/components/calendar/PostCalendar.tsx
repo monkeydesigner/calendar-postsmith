@@ -17,7 +17,12 @@ export const Calendar = ({ view }: CalendarProps) => {
         .order("scheduled_at", { ascending: true });
       
       if (error) throw error;
-      return data as Post[];
+      
+      // Transform the data to match the Post type
+      return (data as any[]).map(post => ({
+        ...post,
+        attachments: Array.isArray(post.attachments) ? post.attachments : []
+      })) as Post[];
     },
   });
 
