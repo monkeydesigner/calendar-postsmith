@@ -9,26 +9,181 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      posts: {
+      invoices: {
+        Row: {
+          amount: number
+          id: string
+          invoice_date: string | null
+          payment_status: string | null
+          stripe_invoice_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          id?: string
+          invoice_date?: string | null
+          payment_status?: string | null
+          stripe_invoice_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          id?: string
+          invoice_date?: string | null
+          payment_status?: string | null
+          stripe_invoice_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string
+          read_status: boolean | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message: string
+          read_status?: boolean | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string
+          read_status?: boolean | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      post_templates: {
         Row: {
           content: string
           created_at: string | null
           id: string
-          scheduled_at: string | null
+          title: string
           user_id: string | null
         }
         Insert: {
           content: string
           created_at?: string | null
           id?: string
-          scheduled_at?: string | null
+          title: string
           user_id?: string | null
         }
         Update: {
           content?: string
           created_at?: string | null
           id?: string
+          title?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      posts: {
+        Row: {
+          attachments: Json | null
+          content: string
+          created_at: string | null
+          id: string
+          published_at: string | null
+          scheduled_at: string | null
+          status: string | null
+          template_id: string | null
+          title: string | null
+          user_id: string | null
+        }
+        Insert: {
+          attachments?: Json | null
+          content: string
+          created_at?: string | null
+          id?: string
+          published_at?: string | null
           scheduled_at?: string | null
+          status?: string | null
+          template_id?: string | null
+          title?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          attachments?: Json | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          published_at?: string | null
+          scheduled_at?: string | null
+          status?: string | null
+          template_id?: string | null
+          title?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "post_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          full_name: string | null
+          id: string
+          stripe_customer_id: string | null
+          subscription_end_date: string | null
+          subscription_status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          full_name?: string | null
+          id: string
+          stripe_customer_id?: string | null
+          subscription_end_date?: string | null
+          subscription_status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          stripe_customer_id?: string | null
+          subscription_end_date?: string | null
+          subscription_status?: string | null
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          end_date: string | null
+          id: string
+          start_date: string | null
+          status: string | null
+          stripe_subscription_id: string | null
+          subscription_plan: string
+          user_id: string | null
+        }
+        Insert: {
+          end_date?: string | null
+          id?: string
+          start_date?: string | null
+          status?: string | null
+          stripe_subscription_id?: string | null
+          subscription_plan: string
+          user_id?: string | null
+        }
+        Update: {
+          end_date?: string | null
+          id?: string
+          start_date?: string | null
+          status?: string | null
+          stripe_subscription_id?: string | null
+          subscription_plan?: string
           user_id?: string | null
         }
         Relationships: []
