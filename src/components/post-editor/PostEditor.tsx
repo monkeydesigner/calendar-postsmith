@@ -15,8 +15,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { publishToLinkedIn, scheduleLinkedInPost } from "@/services/linkedin";
+import { useQueryClient } from "@tanstack/react-query";
 
-export const PostEditor = () => {
+interface PostEditorProps {
+  onClose?: () => void;
+}
+
+export const PostEditor = ({ onClose }: PostEditorProps) => {
   const [date, setDate] = useState<Date>();
   const [time, setTime] = useState("12:00");
   const [title, setTitle] = useState("");
@@ -24,6 +30,7 @@ export const PostEditor = () => {
   const [postAction, setPostAction] = useState<PostAction>("now");
   const [files, setFiles] = useState<File[]>([]);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     setFiles(prev => [...prev, ...acceptedFiles]);
@@ -62,13 +69,49 @@ export const PostEditor = () => {
       return;
     }
 
-    // TODO: Implement LinkedIn API integration
-    toast({
-      title: postAction === "now" ? "Post published" : "Post scheduled",
-      description: postAction === "now" 
-        ? "Your post has been published to LinkedIn" 
-        : `Your post will be published on ${format(date!, "PPP")} at ${time}`
-    });
+    try {
+      const postData = {
+        title,
+        content,
+        attachments: files.map(file => ({
+          type: file.type.startsWith("image/") ? "image" : "document",
+          url: URL.createObjectURL(file),
+          name: file.name
+        }))
+      };
+
+      if (postAction === "now") {
+        await publishToLinkedIn(postData);
+        toast({
+          title: "Post published",
+          description: "Your post has been published to LinkedIn"
+        });
+      } else {
+        const scheduledDate = new Date(date!);
+        const [hours, minutes] = time.split(":");
+        scheduledDate.setHours(parseInt(hours), parseInt(minutes));
+        
+        await scheduleLinkedInPost(postData, scheduledDate);
+        toast({
+          title: "Post scheduled",
+          description: `Your post will be published on ${format(scheduledDate, "PPP")} at ${time}`
+        });
+      }
+
+      // Refresh the posts list
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      
+      if (onClose) {
+        onClose();
+      }
+    } catch (error) {
+      console.error("Error saving post:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save your post. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
